@@ -44,8 +44,8 @@ async fn main() {
         oauth2_client: Client::new(
             ClientId::new(USER_CLOUDS_CLIENT_ID.to_string()),
             Some(ClientSecret::new(USER_CLOUDS_CLIENT_SECRET.to_string())),
-            AuthUrl::new(format!("{}/oidc/authorize", USER_CLOUDS_URL)).unwrap(),
-            Some(TokenUrl::new(format!("{}/oidc/token", USER_CLOUDS_URL)).unwrap()),
+            AuthUrl::new(format!("{USER_CLOUDS_URL}/oidc/authorize")).unwrap(),
+            Some(TokenUrl::new(format!("{USER_CLOUDS_URL}/oidc/token")).unwrap()),
         )
         .set_redirect_uri(RedirectUrl::new(USER_CLOUDS_REDIRECT_URL.to_string()).unwrap()),
     });
@@ -57,7 +57,7 @@ async fn main() {
         .with_state(shared_state);
 
     let addr = SocketAddr::new("0.0.0.0".parse().unwrap(), 3000);
-    println!("server listening on http://{} ...", addr);
+    println!("server listening on http://{addr} ...");
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
@@ -80,7 +80,7 @@ async fn login(State(app_state): State<Arc<AppState>>) -> Response {
         .url();
 
     // Redirect the user to the authorization URL.
-    Redirect::to(&auth_url.to_string()).into_response()
+    Redirect::to(auth_url.as_ref()).into_response()
 }
 
 async fn callback(
